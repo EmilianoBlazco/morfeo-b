@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Attendance;
 use App\Exceptions\Attendance\EntryAlreadyExistsException;
 use App\Exceptions\Attendance\ExitWithoutEntryException;
 use App\Http\Controllers\Controller;
-use App\Services\AttendanceService;
-use http\Client\Request;
+use App\Services\Attendance\AttendanceService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -41,32 +41,12 @@ class AttendanceController extends Controller
         }
     }
 
-
-/*    public function markEntry(Request $request): JsonResponse
+    public function getAttendance(Request $request): JsonResponse
     {
-        try {
-            $userId = $request->input('user_id');
-            $scanTime = $request->input('scan_time');
+        $userId = $request->input('user_id');
 
-            $attendance = $this->attendanceService->recordEntry($userId, $scanTime);
+        $attendance = $this->attendanceService->getAttendanceAll($userId);
 
-            return response()->json(['data' => $attendance, 'message' => 'Entrada registrada correctamente']);
-        }catch (EntryAlreadyExistsException $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
+        return response()->json([$attendance], 200);
     }
-
-    public function markExit(Request $request): JsonResponse
-    {
-        try {
-            $userId = $request->input('user_id');
-            $scanTime = $request->input('scan_time');
-
-            $attendance = $this->attendanceService->recordExit($userId, $scanTime);
-
-            return response()->json(['data' => $attendance, 'message' => 'Salida registrada correctamente']);
-        } catch (ExitWithoutEntryException $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
-    }*/
 }

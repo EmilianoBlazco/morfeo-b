@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
-            $table->enum('status', ['present', 'absent', 'late'])->default('present');
+            $table->enum('status', ['Presente', 'Ausente', 'Tardanza', 'Justificado'])->default('Presente');
             $table->timestamps();
         });
     }

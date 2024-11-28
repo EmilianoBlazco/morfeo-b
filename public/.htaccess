@@ -19,3 +19,10 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Permitir acceso a los archivos en la carpeta storage
+<Directory "/path/to/your/project/public/storage">
+    Options +Indexes
+    AllowOverride All
+    Require all granted
+</Directory>

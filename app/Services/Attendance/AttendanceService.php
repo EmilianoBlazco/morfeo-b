@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Attendance;
 
 use App\Exceptions\Attendance\EntryAlreadyExistsException;
 use App\Exceptions\Attendance\ExitWithoutEntryException;
 use App\Models\Attendance;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class AttendanceService
 {
@@ -62,5 +63,23 @@ class AttendanceService
         $existingAttendance->save();
 
         return $existingAttendance;
+    }
+
+    /**
+     * Obtener todas las inasistencias para un usuario específico (opcional).
+     *
+     * @param int|null $userId
+     * @return Collection
+     */
+    public function getAttendanceAll(int $userId = null): Collection
+    {
+        $query = Attendance::query();
+
+        // Si se proporciona un user_id, agregarlo al filtro
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 }
