@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Http\Controllers\Controller;
-use App\Services\AttendanceService;
+use App\Services\Attendance\AttendanceService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,5 +29,14 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 409);
         }
+    }
+
+    public function getAttendance(Request $request): JsonResponse
+    {
+        $userId = $request->input('user_id');
+
+        $attendance = $this->attendanceService->getAttendanceAll($userId);
+
+        return response()->json([$attendance], 200);
     }
 }

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Attendance;
 
 use App\Exceptions\Attendance\ExitWithoutEntryException;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use App\Exceptions\Attendance\EntryAlreadyExistsException;
+use Illuminate\Support\Collection;
 
 class AttendanceService
 {
@@ -41,7 +42,7 @@ class AttendanceService
             ->count();
 
         // Verificar si ya existe una entrada con salida antes del final del turno matutino
-        $morningEnd = Carbon::parse($parsedScanTime->toDateString() . ' ' . self::MORNING_END);
+        $morningEnd = Carbon::parse($parsedScanTime->toDateString() . ' AttendanceService.php' . self::MORNING_END);
         $morningEntryWithExit = Attendance::where('user_id', $userId)
             ->whereDate('entry_time', $parsedScanTime->toDateString())
             ->where('entry_time', '<', $morningEnd)
@@ -78,12 +79,12 @@ class AttendanceService
         // Horarios configurables para ambos turnos
         $shifts = [
             [
-                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_START),
-                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_END)
+                'start' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::MORNING_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::MORNING_END)
             ],
             [
-                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_START),
-                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_END)
+                'start' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::AFTERNOON_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::AFTERNOON_END)
             ]
         ];
 
@@ -153,5 +154,23 @@ class AttendanceService
             ->whereDate('entry_time', $scanTime->toDateString())
             ->whereNull('exit_time')
             ->first();
+    }
+
+    /**
+     * Obtener todas las inasistencias para un usuario específico (opcional).
+     *
+     * @param int|null $userId
+     * @return Collection
+     */
+    public function getAttendanceAll(int $userId = null): Collection
+    {
+        $query = Attendance::query();
+
+        // Si se proporciona un user_id, agregarlo al filtro
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 }
