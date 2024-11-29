@@ -77,6 +77,7 @@ class AttendanceService
     private function handleEntry($userId, Carbon $scanTime): Attendance
     {
         // Horarios configurables para ambos turnos
+        // Horarios configurables para ambos turnos
         $shifts = [
             [
                 'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_START),
