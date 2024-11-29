@@ -11,10 +11,13 @@ class Attendance extends Model
 {
     use HasFactory;
 
+    protected $table = 'attendances';
+
     // Definir los estados como constantes
-    const STATUS_PRESENT = 'present';
-    const STATUS_ABSENT = 'absent';
-    const STATUS_LATE = 'late';
+    const STATUS_PRESENT = 'Presente';
+    const STATUS_ABSENT = 'Ausente';
+    const STATUS_LATE = 'Tardanza';
+    const STATUS_JUSTIFIED = 'Justificado';
 
     // Definir los campos que son asignables en masa
     protected $fillable = [
@@ -32,6 +35,12 @@ class Attendance extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relación con justificativos asociados a esta asistencia
+    public function justifyUploads()
+    {
+        return $this->hasMany(JustifyUpload::class, 'attendance_id');
     }
 
     // Accesor para obtener la hora de entrada en formato 'H:i:s'

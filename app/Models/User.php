@@ -49,4 +49,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relación con asistencias
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'employee_id');
+    }
+
+    // Relación con justificativos subidos por este usuario
+    public function justifyUploadsAsEmployee()
+    {
+        return $this->hasMany(JustifyUpload::class, 'employee_id');
+    }
+
+    // Relación con justificativos supervisados por este usuario
+    public function justifyUploadsAsSupervisor()
+    {
+        return $this->hasMany(JustifyUpload::class, 'supervisor_id');
+    }
 }

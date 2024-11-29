@@ -22,21 +22,46 @@ class DatabaseSeeder extends Seeder
         ]);*/
 
         $this->call([
-            RoleAndPermissionSeeder::class
+            RoleAndPermissionSeeder::class,
         ]);
 
         User::factory()->create([
-            'name' => 'Test User',
-            'surname' => 'Test User',
-            'dni' => '12345678',
+            'name' => 'Director',
+            'surname' => 'Test Director',
+            'dni' => '12345677',
             'phone' => '12345678',
-            'email' => 'e@gmail.com',
+            'email' => 'd@gmail.com',
             'password' => Hash::make('contraseña'),
         ]);
+
+        User::factory()->create([
+            'name' => 'Supervisor',
+            'surname' => 'Test Supervisor',
+            'dni' => '12345678',
+            'phone' => '12345678',
+            'email' => 's@gmail.com',
+            'password' => Hash::make('contraseña'),
+        ]);
+
+        User::factory()->create([
+            'name' => 'Operario',
+            'surname' => 'Test Operario',
+            'dni' => '12345679',
+            'phone' => '12345678',
+            'email' => 'o@gmail.com',
+            'password' => Hash::make('contraseña'),
+        ]);
+
 
         //Asignar rol de director al usuario creado
         $user = User::find(1);
         $user->assignRole('Director');
+        $user = User::find(2);
+        $user->assignRole('Supervisor');
+        $user = User::find(3);
+        $user->assignRole('Operario');
+
+        $this->call(AttendanceSeeder::class);
 
     }
 }

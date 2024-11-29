@@ -42,7 +42,7 @@ class AttendanceService
             ->count();
 
         // Verificar si ya existe una entrada con salida antes del final del turno matutino
-        $morningEnd = Carbon::parse($parsedScanTime->toDateString() . ' AttendanceService.php' . self::MORNING_END);
+        $morningEnd = Carbon::parse($parsedScanTime->toDateString() . ' ' . self::MORNING_END);
         $morningEntryWithExit = Attendance::where('user_id', $userId)
             ->whereDate('entry_time', $parsedScanTime->toDateString())
             ->where('entry_time', '<', $morningEnd)
@@ -77,14 +77,15 @@ class AttendanceService
     private function handleEntry($userId, Carbon $scanTime): Attendance
     {
         // Horarios configurables para ambos turnos
+        // Horarios configurables para ambos turnos
         $shifts = [
             [
-                'start' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::MORNING_START),
-                'end' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::MORNING_END)
+                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_END)
             ],
             [
-                'start' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::AFTERNOON_START),
-                'end' => Carbon::parse($scanTime->toDateString() . ' AttendanceService.php' . self::AFTERNOON_END)
+                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_END)
             ]
         ];
 
