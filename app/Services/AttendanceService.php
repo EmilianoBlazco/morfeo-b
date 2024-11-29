@@ -15,7 +15,7 @@ class AttendanceService
     // Horarios de entrada y salida
     const MORNING_START = '08:00';
     const MORNING_END = '12:00';
-    const AFTERNOON_START = '19:00';
+    const AFTERNOON_START = '16:00';
     const AFTERNOON_END = '20:00';
 
     /**
@@ -70,51 +70,59 @@ class AttendanceService
         }
     }
 
+    /**
+     * @throws EntryAlreadyExistsException
+     */
     private function handleEntry($userId, Carbon $scanTime): Attendance
     {
-        // Definir horarios de entrada y salida
-        $morningStart = Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_START);
-        $morningEnd = Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_END);
-
-        $afternoonStart = Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_START);
-        $afternoonEnd = Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_END);
-
+        // Horarios configurables para ambos turnos
+        $shifts = [
+            [
+                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::MORNING_END)
+            ],
+            [
+                'start' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_START),
+                'end' => Carbon::parse($scanTime->toDateString() . ' ' . self::AFTERNOON_END)
+            ]
+        ];
 
         // Verificar si la entrada se está marcando después de que terminó el primer turno
-        if ($scanTime->greaterThan($morningEnd)) {
+        if ($scanTime->greaterThan($shifts[0]['end'])) {
             // Si no hay registro de entrada en la mañana, marcar el primer turno como ausente
             $morningAttendance = Attendance::where('user_id', $userId)
                 ->whereDate('entry_time', $scanTime->toDateString())
-                ->where('entry_time', '<', $morningEnd)
+                ->where('entry_time', '<', $shifts[0]['end'])
                 ->first();
 
             if (!$morningAttendance) {
-                $this->markAbsent($userId, $morningEnd);
+                $this->markAbsent($userId, $shifts[0]['end']);
             }
         }
 
-        // Crear un nuevo registro de entrada
         $attendance = new Attendance();
         $attendance->user_id = $userId;
         $attendance->entry_time = $scanTime;
 
-        // Determinar el estado (presente, tarde o ausente)
-        if ($scanTime->lessThan($morningStart)) {
-            $attendance->status = Attendance::STATUS_PRESENT;
-        } elseif ($scanTime->between($morningStart, $morningEnd)) {
-            $minutesLate = $morningStart->diffInMinutes($scanTime);
-            $attendance->status = $minutesLate <= 10
-                ? Attendance::STATUS_PRESENT
-                : ($minutesLate <= 15 ? Attendance::STATUS_LATE : Attendance::STATUS_ABSENT);
-        } elseif ($scanTime->between($morningEnd, $afternoonStart)) {
-            $attendance->status = Attendance::STATUS_PRESENT;
-        } elseif ($scanTime->between($afternoonStart, $afternoonEnd)) {
-            $minutesLate = $afternoonStart->diffInMinutes($scanTime);
-            $attendance->status = $minutesLate <= 10
-                ? Attendance::STATUS_PRESENT
-                : ($minutesLate <= 15 ? Attendance::STATUS_LATE : Attendance::STATUS_ABSENT);
-        } else {
-            $attendance->status = Attendance::STATUS_ABSENT;
+        foreach ($shifts as $shift) {
+            $allowedStart = $shift['start']->copy()->subMinutes(20);
+            $lateEnd = $shift['start']->copy()->addMinutes(15);
+
+            if ($scanTime->between($allowedStart, $shift['start'])) {
+                $attendance->status = Attendance::STATUS_PRESENT;
+                break;
+            } elseif ($scanTime->between($shift['start'], $lateEnd)) {
+                $attendance->status = Attendance::STATUS_LATE;
+                break;
+            } elseif ($scanTime->greaterThan($lateEnd) && $scanTime->lessThan($shift['end'])) {
+                $attendance->status = Attendance::STATUS_ABSENT;
+                break;
+            }
+        }
+
+        // Si no entra en ningún rango, se da una execepción que diga que no se puede marcar la asistencia en este horario de entrada
+        if (!isset($attendance->status)) {
+            throw new EntryAlreadyExistsException("No se puede marcar la asistencia en este horario.");
         }
 
         $attendance->save();

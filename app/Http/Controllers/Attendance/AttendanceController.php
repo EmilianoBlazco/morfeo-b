@@ -27,7 +27,7 @@ class AttendanceController extends Controller
             $message = $attendance->exit_time ? 'Salida registrada.' : 'Entrada registrada.';
             return response()->json(['message' => $message, 'data' => $attendance]);
         } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 409);
         }
     }
 }
