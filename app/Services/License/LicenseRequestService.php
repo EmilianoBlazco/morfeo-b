@@ -63,8 +63,24 @@ class LicenseRequestService
     public function getSupervisorRequests()
     {
         $supervisorId = Auth::id();
+
         return LicenseRequest::with(['license', 'employee'])
             ->where('supervisor_id', $supervisorId)
-            ->get();
+            ->get()
+            ->map(function ($request) {
+                return [
+                    'id' => $request->id,
+                    'license_name' => $request->license->name ?? null,
+                    'employee_name' => $request->employee->name . ' ' . $request->employee->surname,
+                    'start_date' => Carbon::parse($request->start_date)->toDateString(),
+                    'end_date' => Carbon::parse($request->end_date)->toDateString(),
+                    'created_at' => $request->created_at->toDateTimeString(),
+                    'duration_days' => $request->duration_days,
+                    'status' => $request->status,
+                    'justification_file' => $request->justification_file
+                        ? asset('storage/' . $request->justification_file)
+                        : null, // Generar la URL pública del archivo si existe
+                ];
+            });
     }
 }
