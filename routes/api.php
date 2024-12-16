@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\JustifyUploadController;
+use App\Http\Controllers\License\LicenseController;
+use App\Http\Controllers\License\LicenseRequestController;
 use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Middleware\EnsureHasEntry;
 use Illuminate\Http\Request;
@@ -26,6 +28,12 @@ Route::middleware(['auth:sanctum'])->patch('/notifications/mark-read-all', [Noti
 Route::post('/notifications/notify-absence', [NotificationController::class, 'notifySupervisorOfAbsence']);
 
 Route::middleware([EnsureHasEntry::class])->post('/attendance', [AttendanceController::class, 'markAttendance']);
+
+//Licenses
+Route::apiResource('licenses', LicenseController::class)->except(['update']);
+Route::get('/license-requests/verify', [LicenseRequestController::class, 'getSupervisorRequests']);
+Route::apiResource('license-requests', LicenseRequestController::class)->except(['update']);
+
 
 
 require __DIR__.'/auth.php';

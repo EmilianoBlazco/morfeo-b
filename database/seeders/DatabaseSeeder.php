@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleAndPermissionSeeder::class,
+            LicenseSeeder::class,
         ]);
 
         User::factory()->create([
@@ -62,6 +63,9 @@ class DatabaseSeeder extends Seeder
         $user->assignRole('Operario');
 
         $this->call(AttendanceSeeder::class);
+
+        //LicenseSeeder
+
 
     }
 }
